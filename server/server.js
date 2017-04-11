@@ -115,6 +115,21 @@ app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user);
 });
 
+// Doesn't use authenticate token because we're trying to get one
+app.post('/users/login', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+
+
+  // start by writing this so you know exactly the method you need in user.js
+  User.findByCredentials(body.email, body.password).then((user) => {
+    return user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(user);
+    });
+  }).catch((e) => {
+    res.status(400).send();
+  });
+});
+
 app.listen(port, () => {
   console.log(`Started up at port ${port}`);
 });
